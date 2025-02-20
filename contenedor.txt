@@ -1,0 +1,65 @@
+version: '3.4'
+
+services:
+  mysql:
+    image: mysql:9.0
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend-network
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - backend-network
+      - frontend-network
+    restart: always
+    depends_on:
+      - mysql
+
+  laravel:
+    image: bitnami/laravel:11.6.1
+    ports:
+    - 8000:8000
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=$MYSQL_USER
+      - DB_DATABASE=$MYSQL_DATABASE
+    networks:
+      - frontend-network
+    volumes:
+      - laravel_data:/var/www/html
+    restart: always
+
+  node:
+    image: node:18
+    volumes:
+      - node_data:/var/www/html
+    depends_on:
+      - laravel
+    restart: always
+
+volumes:
+  mysql_data:
+  laravel_data:
+  node_data:
+
+
+networks:
+  backend-network:
+  frontend-network:
