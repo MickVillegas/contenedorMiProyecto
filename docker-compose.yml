@@ -29,6 +29,20 @@ services:
     depends_on:
       - mysql
 
+  php:
+    build: './php_docker/'
+    volumes:
+      - ./www/:/var/www/html/
+
+  apache:
+    build: './apache_docker/'
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+    volumes:
+      - ./www/:/var/www/html/      
+
   laravel:
     image: bitnami/laravel:11.6.1
     ports:
